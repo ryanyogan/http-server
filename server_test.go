@@ -96,6 +96,19 @@ func TestStoreWins(t *testing.T) {
 	})
 }
 
+func TestLeague(t *testing.T) {
+	store := StubPlayerStore{}
+	server := &PlayerServer{&store}
+
+	t.Run("it returns 200 on /league", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		res := httptest.NewRecorder()
+		server.ServeHTTP(res, req)
+
+		assertStatusCode(t, res.Code, http.StatusOK)
+	})
+}
+
 // Helper Assertion Functions
 func newGetScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
