@@ -6,11 +6,22 @@ import (
 	"strings"
 )
 
-// PlayerServer creates a new server for players
-func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := strings.TrimPrefix(r.URL.Path, "/players/")
+// PlayerStore represents an interface for interracting with the
+// data-store
+type PlayerStore interface {
+	GetPlayerScore(name string) int
+}
 
-	fmt.Fprint(w, GetPlayerScore(player))
+// PlayerServer represents the PlayerStore reference, this interface
+// allows for any store that can use the io.Writer interface (most of Go)
+type PlayerServer struct {
+	store PlayerStore
+}
+
+// ServeHTTP will take a request, and return a response via the `ResponseWriteer`
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
+	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 
 // GetPlayerScore takes a player name and returns their score as a string.
