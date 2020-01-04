@@ -10,8 +10,13 @@ type InMemoryPlayerStore struct{}
 
 // GetPlayerScore takes a name as a string and returns the score as an
 // integer.
-func (u *InMemoryPlayerStore) GetPlayerScore(name string) int {
+func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 	return 123
+}
+
+// RecordWin takes a players name and adds it to the store.
+func (i *InMemoryPlayerStore) RecordWin(name string) {
+	// I DO NOTHING
 }
 
 func main() {

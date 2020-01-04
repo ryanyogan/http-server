@@ -9,12 +9,17 @@ import (
 
 // Stub / Spy setup
 type StubPlayerStore struct {
-	scores map[string]int
+	scores   map[string]int
+	winCalls []string
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.scores[name]
 	return score
+}
+
+func (s *StubPlayerStore) RecordWin(name string) {
+	s.winCalls = append(s.winCalls, name)
 }
 
 func TestGETPlayers(t *testing.T) {
@@ -23,6 +28,7 @@ func TestGETPlayers(t *testing.T) {
 			"Ryan":  20,
 			"Floyd": 10,
 		},
+		nil,
 	}
 
 	server := &PlayerServer{&store}
@@ -62,21 +68,37 @@ func TestGETPlayers(t *testing.T) {
 func TestScoreWins(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]int{},
+		nil,
 	}
-	server := &PlayerServer{&store}
 
-	t.Run("it returns 202 (Created) on POST", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/player/Ryan", nil)
+	server := &PlayerServer{&store}
+	player := "Bob"
+
+	t.Run("it records wins on POST", func(t *testing.T) {
+		request := newPostWinRequest(player)
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
 		assertStatusCode(t, response.Code, http.StatusAccepted)
+
+		if len(store.winCalls) != 1 {
+			t.Fatalf("received: %d calls to RecordWin, expected: %d", len(store.winCalls), 1)
+		}
+
+		if store.winCalls[0] != player {
+			t.Errorf("did not store correct winner; received: %q, expected: %q", store.winCalls[0], player)
+		}
 	})
 }
 
 // Helper Assertion Functions
 func newGetScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
+func newPostWinRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
 	return req
 }
 
