@@ -14,6 +14,7 @@ func TestGETPlayers(t *testing.T) {
 			"Floyd": 10,
 		},
 	}
+
 	server := &PlayerServer{&store}
 
 	t.Run("returns Ryan's score", func(t *testing.T) {
