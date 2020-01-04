@@ -6,20 +6,17 @@ import (
 	"strings"
 )
 
-// PlayerStore represents an interface for interracting with the
-// data-store
+// PlayerStore stores score information about players
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
 }
 
-// PlayerServer represents the PlayerStore reference, this interface
-// allows for any store that can use the io.Writer interface (most of Go)
+// PlayerServer is an HTTP interface for player information
 type PlayerServer struct {
 	store PlayerStore
 }
 
-// ServeHTTP will take a request, and return a response via the `ResponseWriteer`
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
@@ -44,17 +41,4 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
-}
-
-// GetPlayerScore takes a player name and returns their score as a string.
-func GetPlayerScore(name string) string {
-	if name == "Ryan" {
-		return "20"
-	}
-
-	if name == "Floyd" {
-		return "10"
-	}
-
-	return ""
 }
