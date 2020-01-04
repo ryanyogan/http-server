@@ -91,6 +91,22 @@ func TestScoreWins(t *testing.T) {
 	})
 }
 
+func TestRecordingWinsAndRetrievingThem(t *testing.T) {
+	store := NewInMemoryPlayerStore()
+	server := PlayerServer{store}
+	player := "Ryan"
+
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, newGetScoreRequest(player))
+
+	assertStatusCode(t, response.Code, http.StatusOK)
+	assertResponseBody(t, response.Body.String(), "3")
+}
+
 // Helper Assertion Functions
 func newGetScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)

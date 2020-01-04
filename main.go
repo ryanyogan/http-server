@@ -5,22 +5,34 @@ import (
 	"net/http"
 )
 
+// -- Temp memory store until we need a DB -- //
+
+// NewInMemoryPlayerStore returns a new instance of the Memory backed
+// data-store
+func NewInMemoryPlayerStore() *InMemoryPlayerStore {
+	return &InMemoryPlayerStore{map[string]int{}}
+}
+
 // InMemoryPlayerStore is a temporary data-base for us to work with
-type InMemoryPlayerStore struct{}
+type InMemoryPlayerStore struct {
+	store map[string]int
+}
 
 // GetPlayerScore takes a name as a string and returns the score as an
 // integer.
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return 123
+	return i.store[name]
 }
 
 // RecordWin takes a players name and adds it to the store.
 func (i *InMemoryPlayerStore) RecordWin(name string) {
-	// I DO NOTHING
+	i.store[name]++
 }
 
+// -- End of Temp memory store block //
+
 func main() {
-	server := &PlayerServer{&InMemoryPlayerStore{}}
+	server := &PlayerServer{NewInMemoryPlayerStore()}
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatalf("could not listen on port 5000 %v", err)
